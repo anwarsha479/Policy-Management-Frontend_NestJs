@@ -1,48 +1,118 @@
 const API_URL = process.env.REACT_APP_API_URL;
 
-interface ApiProps {
-  method: string;
-  url: string;
-  data?: any;
-  token?: string;
-}
+// COMMON HEADER FUNCTION
+const getHeaders = (token?: string) => ({
+  "Content-Type": "application/json",
+  ...(token && {
+    Authorization: `Bearer ${token}`,
+  }),
+});
 
-export const API = async ({ method, url, data, token }: ApiProps) => {
-  const response = await fetch(`${API_URL}${url}`, {
-    method,
-
-    headers: {
-      "Content-Type": "application/json",
-
-      ...(token && {
-        Authorization: `Bearer ${token}`,
-      }),
-    },
-
-    ...(data && {
-      body: JSON.stringify(data),
-    }),
-  });
-
+// COMMON REQUEST FUNCTION
+const request = async (url: string, options: RequestInit) => {
+  const response = await fetch(`${API_URL}${url}`, options);
   return response.json();
 };
 
-export const loginApi = (payload: object) => {
-  return API({
+// AUTH Login APIs
+export const loginApi = (email: string, password: string) => {
+  return request("/auth/login", {
     method: "POST",
-
-    url: "/auth/login",
-
-    data: payload,
+    headers: getHeaders(),
+    body: JSON.stringify({
+      email,
+      password,
+    }),
   });
 };
 
-export const getEmployeeApi = (name: string, token: string) => {
-  return API({
+// EMPLOYEE APIs//
+// GET EMPLOYEES API
+export const getEmployeeApi = (
+  page: number,
+  limit: number,
+  search: string,
+  token: string,
+) => {
+  return request(`/employee?page=${page}&limit=${limit}&search=${search}`, {
     method: "GET",
+    headers: getHeaders(token),
+  });
+};
 
-    url: `/employee?name=${name}`,
+// CREATE EMPLOYEE API
+export const createEmployeeApi = (payload: object, token: string) => {
+  return request("/employee", {
+    method: "POST",
+    headers: getHeaders(token),
+    body: JSON.stringify(payload),
+  });
+};
 
-    token,
+// UPDATE EMPLOYEE API
+export const updateEmployeeApi = (
+  id: number,
+  payload: object,
+  token: string,
+) => {
+  return request(`/employee/update/${id}`, {
+    method: "PATCH",
+    headers: getHeaders(token),
+    body: JSON.stringify(payload),
+  });
+};
+
+// DELETE EMPLOYEE API
+export const deleteEmployeeApi = (id: number, token: string) => {
+  return request(`/employee/delete/${id}`, {
+    method: "DELETE",
+    headers: getHeaders(token),
+  });
+};
+
+// GET DASHBOARD STATS API
+export const getDashboardStatsApi = (token: string) => {
+  return request("/dashboard", {
+    method: "GET",
+    headers: getHeaders(token),
+  });
+};
+
+// GET POLICY API
+export const getPoliciesApi = (
+  page: number,
+  limit: number,
+  search: string,
+  token: string,
+) => {
+  return request(`/policy?page=${page}&limit=${limit}&search=${search}`, {
+    method: "GET",
+    headers: getHeaders(token),
+  });
+};
+
+//CREATE POLICY API
+export const createPolicyApi = (payload: object, token: string) => {
+  return request("/policy", {
+    method: "POST",
+    headers: getHeaders(token),
+    body: JSON.stringify(payload),
+  });
+};
+
+//UPDATE POLICY API
+export const updatePolicyApi = (id: number, payload: object, token: string) => {
+  return request(`/policy/update/${id}`, {
+    method: "PATCH",
+    headers: getHeaders(token),
+    body: JSON.stringify(payload),
+  });
+};
+
+//DELETE POLICY API
+export const deletePolicyApi = (id: number, token: string) => {
+  return request(`/policy/delete/${id}`, {
+    method: "DELETE",
+    headers: getHeaders(token),
   });
 };
