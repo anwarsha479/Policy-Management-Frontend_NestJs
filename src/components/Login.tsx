@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import {Container,Paper,Typography,TextField,Button,Box,Alert,} from "@mui/material";
 import LoginIcon from "@mui/icons-material/Login";
 import { loginApi } from "../services/api";
-import { loginPayload } from "../utils/payload";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -14,27 +15,22 @@ function Login() {
     e.preventDefault();
     try {
       setLoading(true);
-      const payload = loginPayload(email, password);
-      const loginData = await loginApi(payload);
-      if (!loginData.access_token) {
-        setError("Invalid credentials");
-        setLoading(false);
-        return;
-      }
-
+      setError("");
+      const loginData = await loginApi(email, password);
+      console.log(loginData);
       localStorage.setItem("token", loginData.access_token);
       const decoded: any = jwtDecode(loginData.access_token);
       localStorage.setItem("role", decoded.role);
       localStorage.setItem("email", decoded.email);
-      setError("");
-      window.location.href = "/employees";
-    } catch (err) {
+      window.location.href="/dashboard";
+    } catch (err: any) {
       console.error(err);
-      setError("Server error");
+      setError(err.message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <Container
       maxWidth="sm"
@@ -137,5 +133,4 @@ function Login() {
     </Container>
   );
 }
-
 export default Login;
